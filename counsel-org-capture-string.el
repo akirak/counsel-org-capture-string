@@ -1,0 +1,126 @@
+;;; counsel-org-capture-string.el --- Counsel for org-capture-string -*- lexical-binding: t -*-
+
+;; Copyright (C) 2018 Akira Komamura
+
+;; Author: Akira Komamura <akira.komamura@gmail.com>
+;; Version: 1.0-pre
+;; Package-Requires: ((emacs "25.1") (ivy "0.10"))
+;; URL: https://github.com/akirak/counsel-org-capture-string
+
+;; This file is not part of GNU Emacs.
+
+;;; License:
+
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This library provides `counsel-org-capture-string' command, which is
+;; supplies input to `org-capture-string' from Counsel/Ivy.
+
+;; Because the command is based on Ivy, it supports extra actions.
+;; You can insert/copy a candidate, and you can add custom actions.
+
+;;; Code:
+
+(require 'ivy)
+
+(defcustom counsel-org-capture-string-sources
+  '(counsel-org-capture-string--org-clock-candidates
+    counsel-org-capture-string--buffer-name-candidates
+    counsel-org-capture-string--projectile-candidates
+    counsel-org-capture-string--imenu-candidates)
+  "List of candidate generators for `counsel-org-capture-string'.
+
+Each item in this list should be a function that takes no argument and returns
+an alist. Each item in the resulting list should be a cons cell of a content
+string and a help string."
+  :type '(repeat function)
+  :group 'counsel-org-capture-string)
+
+(defcustom counsel-org-capture-string-height 6
+  "`ivy-height' for `counsel-org-capture-string'.
+
+When nil, the default value is used."
+  :type '(choice integer (const nil))
+  :group 'counsel-org-capture-string)
+
+(defvar counsel-org-capture-string--candidates nil)
+(defvar counsel-org-capture-string-history nil)
+
+(defun counsel-org-capture-string ()
+  "Supply input to `org-capture-string' from counsel."
+  (interactive)
+  (let ((ivy-height (or counsel-org-capture-string-height ivy-height)))
+    (ivy-read "Initial text: "
+              #'counsel-org-capture-string--candidates
+              :caller 'counsel-org-capture-string
+              :history 'counsel-org-capture-string-history
+              :action #'org-capture-string)))
+
+(defun counsel-org-capture-string--candidates (&optional _string
+                                                         _collection
+                                                         _predicate)
+  "Generate completion candidates."
+  (mapcar #'car
+          (setq counsel-org-capture-string--candidates
+                (apply #'append
+                       (mapcar #'funcall counsel-org-capture-string-sources)))))
+
+(defun counsel-org-capture-string--transformer (str)
+  "Candidate transformer."
+  (if-let ((help (cdr (assoc str counsel-org-capture-string--candidates))))
+      (format "%s %s" (propertize help 'face 'ivy-action) str)
+    str))
+
+(ivy-set-display-transformer
+ 'counsel-org-capture-string
+ 'counsel-org-capture-string--transformer)
+
+;;;; Example candidate functions
+
+(defun counsel-org-capture-string--org-clock-candidates ()
+  "Generate candidates from the current status of org-clock."
+  (when (org-clocking-p)
+    `((,org-clock-current-task . "current org clock task"))))
+
+(defun counsel-org-capture-string--buffer-name-candidates ()
+  "Generate candidates from the buffer name and possibly its file name."
+  (cons `(,(buffer-name) . "buffer name")
+        (when buffer-file-name
+          `((,buffer-file-name . "buffer file")
+            (,(file-name-nondirectory buffer-file-name) . "buffer file (w/o dir)")))))
+
+(defun counsel-org-capture-string--projectile-candidates ()
+  "Generate candidates related to the current projectile project."
+  (when (and (featurep 'projectile)
+             (bound-and-true-p projectile-cached-project-name))
+    `((,projectile-cached-project-name . "projectile project name"))))
+
+(defun counsel-org-capture-string--imenu-candidates ()
+  "Generate candidates from imenu entries."
+  (let ((items (imenu--make-index-alist t)))
+    (mapcar (lambda (cell)
+              (cons (car cell)
+                    (let* ((marker (cdr cell))
+                           (buffer (marker-buffer marker)))
+                      (format "imenu: %s (%d)"
+                              (if-let ((filename (buffer-file-name buffer)))
+                                  (file-name-nondirectory filename)
+                                (buffer-name buffer))
+                              (marker-position marker)))))
+            (cdr (delete (assoc "*Rescan*" items) items)))))
+
+(provide 'counsel-org-capture-string)
+;;; counsel-org-capture-string.el ends here

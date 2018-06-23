@@ -1,0 +1,34 @@
+* counsel-org-capture-string
+
+This is a counsel wrapper for =org-capture-string= in Emacs Org mode. 
+
+=org-capture-string= is a function that lets you fire an =org-capture= template with a given initial input. Unlike the normal =org-capture= with which you have to choose a template before you type input, =org-capture-string= lets you enter input text before you choose a template. I personally find this workflow often more "natural", because I usually seem to come up with an idea before thinking about where to refile it.
+
+=counsel-org-capture-string= is like =org-capture-string=, but it lets you enter input via [[https://github.com/abo-abo/swiper][Ivy]]. Because it is based on Ivy, it supports alternative actions such as insertion and copying. =counsel-org-capture-string= also supports defining functions for generating completion candidates so that you can enter a particular keyword efficiently. That is, =counsel-org-capture-string= is an omni note-taking interface for Emacs.
+
+** Prerequisites
+This package requires Emacs 25.1.
+** Installation
+This package is not available from MELPA at present. Please install this package manually as well as [[https://github.com/abo-abo/swiper][Ivy]].
+** Configuration
+You don't need an initial configuration to use this package, but it allows you to set options via the Emacs customization interface. Check out =counsel-org-capture-string= group. In particular, =counsel-org-capture-string-sources= allows you to customize candidates
+** Usage
+Run =counsel-org-capture-string= command. Its basic usage is the same as =org-capture-string=.
+
+1. Enter input.
+2. Choose an =org-capture= template.
+*** Guide to Ivy
+Because the command is based on Ivy, any knowledge about Ivy applies to it. The following tips may be useful when you use this package:
+
+- ~M-i~ to insert the candidate into the mini buffer and continue editing
+- ~M-n~ to enter a symbol at point
+- ~M-y~ to insert text from the kill ring
+- ~M-o~ to select an alternative action
+  - ~i~ to insert the candidate into the original buffer
+  - ~w~ to store the candidate to the kill ring
+  - =ivy-add-actions= lets you define extra actions
+- ~C-r~ to review the history
+** Inspirations
+The original inspiration for this package was [[http://www.howardism.org/Technical/Emacs/capturing-content.html][this blog post]].
+** License
+GPL v3
