@@ -147,9 +147,9 @@ When nil, the default value is used."
 
 (defun counsel-org-capture-string--projectile-candidates ()
   "Generate candidates related to the current projectile project."
-  (when (and (featurep 'projectile)
-             (bound-and-true-p projectile-cached-project-name))
-    `((,projectile-cached-project-name . "projectile project name"))))
+  (when-let ((project (and (featurep 'projectile)
+                           (bound-and-true-p projectile-cached-project-name))))
+    `((,project . "projectile project name"))))
 
 (defun counsel-org-capture-string--imenu-candidates ()
   "Generate candidates from imenu entries."
