@@ -35,6 +35,7 @@
 ;;; Code:
 
 (require 'ivy)
+(require 'org-capture)
 
 (defcustom counsel-org-capture-string-sources
   '(counsel-org-capture-string--org-clock-candidates
@@ -44,7 +45,7 @@
   "List of candidate generators for `counsel-org-capture-string'.
 
 Each item in this list should be a function that takes no argument and returns
-an alist. Each item in the resulting list should be a cons cell of a content
+an alist.  Each item in the resulting list should be a cons cell of a content
 string and a help string."
   :type '(repeat function)
   :group 'counsel-org-capture-string)
@@ -54,7 +55,10 @@ string and a help string."
 
 When nil, the default value is used."
   :type '(choice integer (const nil))
-  :group 'counsel-org-capture-string)
+  :group 'counsel-org-capture-string
+  :set (lambda (key value)
+         (set key value)
+         (map-put ivy-height-alist 'counsel-org-capture-string value)))
 
 (defvar counsel-org-capture-string--candidates nil)
 (defvar counsel-org-capture-string-history nil)
@@ -62,12 +66,11 @@ When nil, the default value is used."
 (defun counsel-org-capture-string ()
   "Supply input to `org-capture-string' from counsel."
   (interactive)
-  (let ((ivy-height (or counsel-org-capture-string-height ivy-height)))
-    (ivy-read "Initial text: "
-              #'counsel-org-capture-string--candidates
-              :caller 'counsel-org-capture-string
-              :history 'counsel-org-capture-string-history
-              :action #'org-capture-string)))
+  (ivy-read "Initial text: "
+            #'counsel-org-capture-string--candidates
+            :caller 'counsel-org-capture-string
+            :history 'counsel-org-capture-string-history
+            :action #'org-capture-string))
 
 (defun counsel-org-capture-string--candidates (&optional _string
                                                          _collection
@@ -79,7 +82,7 @@ When nil, the default value is used."
                        (mapcar #'funcall counsel-org-capture-string-sources)))))
 
 (defun counsel-org-capture-string--transformer (str)
-  "Candidate transformer."
+  "Format input STR."
   (if-let ((help (cdr (assoc str counsel-org-capture-string--candidates))))
       (format "%s %s" (propertize help 'face 'ivy-action) str)
     str))
@@ -89,7 +92,7 @@ When nil, the default value is used."
  'counsel-org-capture-string--transformer)
 
 (defun counsel-org-capture-string--template-list (_string _candidates _)
-  "Generate a list of org-capture templates."
+  "Generate a descriptive list of `org-capture-templates'."
   (let* ((table (cl-loop for (key desc type target) in org-capture-templates
                          when type
                          collect (list key
@@ -128,8 +131,12 @@ When nil, the default value is used."
 
 (defun counsel-org-capture-string--org-clock-candidates ()
   "Generate candidates from the current status of org-clock."
-  (when (org-clocking-p)
-    `((,org-clock-current-task . "current org clock task"))))
+  (when (and (fboundp 'org-clocking-p)
+             (org-clocking-p))
+    `((,(with-current-buffer (marker-buffer org-clock-marker)
+          (goto-char org-clock-marker)
+          (substring-no-properties (org-get-heading t t)))
+       . "current org clock task"))))
 
 (defun counsel-org-capture-string--buffer-name-candidates ()
   "Generate candidates from the buffer name and possibly its file name."
