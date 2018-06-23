@@ -110,7 +110,9 @@ When nil, the default value is used."
 
 (defun counsel-org-capture-string--imenu-candidates ()
   "Generate candidates from imenu entries."
-  (let ((items (imenu--make-index-alist t)))
+  (let ((items (condition-case nil
+                   (imenu--make-index-alist t)
+                 (error nil))))
     (mapcar (lambda (cell)
               (cons (car cell)
                     (let* ((marker (cdr cell))
