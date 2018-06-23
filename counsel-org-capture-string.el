@@ -36,6 +36,8 @@
 
 (require 'ivy)
 (require 'org-capture)
+(require 'map)
+(require 'imenu)
 
 (defcustom counsel-org-capture-string-sources
   '(counsel-org-capture-string--org-clock-candidates
