@@ -88,6 +88,42 @@ When nil, the default value is used."
  'counsel-org-capture-string
  'counsel-org-capture-string--transformer)
 
+(defun counsel-org-capture-string--template-list (_string _candidates _)
+  "Generate a list of org-capture templates."
+  (let* ((table (cl-loop for (key desc type target) in org-capture-templates
+                         when type
+                         collect (list key
+                                       desc
+                                       (symbol-name type)
+                                       (pcase target
+                                         (`(id ,id) (format "id:%s" id))
+                                         (`(clock) "clock")
+                                         (`(function ,func) (symbol-name func))
+                                         (`(,_ ,filename . ,_) (file-name-nondirectory filename))))))
+         (w1 (apply #'max (mapcar (lambda (cells) (length (nth 0 cells)))
+                                  table)))
+         (w2 (apply #'max (mapcar (lambda (cells) (length (nth 1 cells)))
+                                  table)))
+         (w3 (apply #'max (mapcar (lambda (cells) (length (nth 2 cells)))
+                                  table)))
+         (fmt (format "%%-%ds  %%-%ds  %%-%ds  %%s" w1 w2 w3)))
+    (mapcar (lambda (cell) (apply #'format fmt cell))
+            table)))
+
+(defun counsel-org-capture-string--select (string)
+  "Capture something with STRING as an initial input."
+  (require 'org-capture)
+  (ivy-read (format "Capture template to pass \"%s\": " string)
+            #'counsel-org-capture-string--template-list
+            :require-match t
+            :action (lambda (x)
+                      (org-capture-string string (car (split-string x))))
+            :caller 'counsel-org-capture-string--select))
+
+(ivy-add-actions 'counsel-org-capture-string
+                 '(("c" counsel-org-capture-string--select
+                    "Select a template via Ivy")))
+
 ;;;; Example candidate functions
 
 (defun counsel-org-capture-string--org-clock-candidates ()
