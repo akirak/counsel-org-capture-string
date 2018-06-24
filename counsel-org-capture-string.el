@@ -39,6 +39,7 @@
 (require 'org-capture)
 (require 'map)
 (require 'imenu)
+(require 'cl-macs)
 
 (defcustom counsel-org-capture-string-sources
   '(counsel-org-capture-string--org-clock-candidates
@@ -163,11 +164,11 @@ When nil, the default value is used."
                      (file-name-nondirectory filename)
                    (buffer-name)))
         result)
-    (flet ((flatten (alist) (dolist (cell alist)
-                              (if (imenu--subalist-p cell)
-                                  (progn (push (cons (car cell) nil) result)
-                                         (flatten (cdr cell)))
-                                (push cell result)))))
+    (cl-flet ((flatten (alist) (dolist (cell alist)
+                                 (if (imenu--subalist-p cell)
+                                     (progn (push (cons (car cell) nil) result)
+                                            (flatten (cdr cell)))
+                                   (push cell result)))))
       (flatten (cdr (delete (assoc "*Rescan*" items) items))))
     (mapcar (lambda (cell)
               (cons (car cell)
