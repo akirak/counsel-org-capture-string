@@ -158,17 +158,30 @@ When nil, the default value is used."
   "Generate candidates from imenu entries."
   (let ((items (condition-case nil
                    (imenu--make-index-alist t)
-                 (error nil))))
+                 (error nil)))
+        (bufname (if-let ((filename (buffer-file-name)))
+                     (file-name-nondirectory filename)
+                   (buffer-name)))
+        result)
+    (flet ((flatten (alist) (dolist (cell alist)
+                              (if (imenu--subalist-p cell)
+                                  (progn (push (cons (car cell) nil) result)
+                                         (flatten (cdr cell)))
+                                (push cell result)))))
+      (flatten (cdr (delete (assoc "*Rescan*" items) items))))
     (mapcar (lambda (cell)
               (cons (car cell)
-                    (let* ((marker (cdr cell))
-                           (buffer (marker-buffer marker)))
-                      (format "imenu: %s (%d)"
-                              (if-let ((filename (buffer-file-name buffer)))
-                                  (file-name-nondirectory filename)
-                                (buffer-name buffer))
-                              (marker-position marker)))))
-            (cdr (delete (assoc "*Rescan*" items) items)))))
+                    (format "imenu: %s %s"
+                            bufname
+                            (if-let ((x (cdr cell))
+                                     (marker (pcase x
+                                               ((pred markerp) x)
+                                               ((and `(marker . ,_)
+                                                     (guard (markerp marker)))
+                                                marker))))
+                                (format "(%d)" (marker-position marker))
+                              ""))))
+            (nreverse result))))
 
 (provide 'counsel-org-capture-string)
 ;;; counsel-org-capture-string.el ends here
