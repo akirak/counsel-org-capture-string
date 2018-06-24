@@ -177,7 +177,7 @@ When nil, the default value is used."
                             (if-let ((x (cdr cell))
                                      (marker (pcase x
                                                ((pred markerp) x)
-                                               ((and `(marker . ,_)
+                                               ((and `(,marker . ,_)
                                                      (guard (markerp marker)))
                                                 marker))))
                                 (format "(%d)" (marker-position marker))
