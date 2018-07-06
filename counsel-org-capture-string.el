@@ -67,6 +67,7 @@ When nil, the default value is used."
 (defvar counsel-org-capture-string--candidates nil)
 (defvar counsel-org-capture-string-history nil)
 
+;;;###autoload
 (defun counsel-org-capture-string ()
   "Supply input to `org-capture-string' from counsel."
   (interactive)
