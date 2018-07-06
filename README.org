@@ -1,6 +1,4 @@
-[[https://travis-ci.org/akirak/counsel-org-capture-string.svg?branch=master]]
-
-* counsel-org-capture-string
+* counsel-org-capture-string [[https://melpa.org/#/counsel-org-capture-string][file:https://melpa.org/packages/counsel-org-capture-string-badge.svg]] [[https://travis-ci.org/akirak/counsel-org-capture-string.svg?branch=master]]
 
 This is a counsel wrapper for =org-capture-string= in Emacs Org mode. 
 
@@ -11,7 +9,7 @@ This is a counsel wrapper for =org-capture-string= in Emacs Org mode.
 ** Prerequisites
 This package requires Emacs 25.1.
 ** Installation
-This package is not available from MELPA at present. Please install this package manually as well as [[https://github.com/abo-abo/swiper][Ivy]].
+This package is available from MELPA as =counsel-org-capture-string=.
 ** Configuration
 You don't need an initial configuration to use this package, but it allows you to set options via the Emacs customization interface. Check out =counsel-org-capture-string= group. In particular, =counsel-org-capture-string-sources= allows you to customize candidates
 ** Usage
