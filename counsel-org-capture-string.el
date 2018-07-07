@@ -39,7 +39,7 @@
 (require 'org-capture)
 (require 'map)
 (require 'imenu)
-(require 'cl-macs)
+(require 'cl-lib)
 
 (defcustom counsel-org-capture-string-sources
   '(counsel-org-capture-string--org-clock-candidates
