@@ -1,4 +1,5 @@
-* counsel-org-capture-string [[https://melpa.org/#/counsel-org-capture-string][file:https://melpa.org/packages/counsel-org-capture-string-badge.svg]] [[https://travis-ci.org/akirak/counsel-org-capture-string.svg?branch=master]]
+* counsel-org-capture-string
+[[https://melpa.org/#/counsel-org-capture-string][file:https://melpa.org/packages/counsel-org-capture-string-badge.svg]] [[https://travis-ci.org/akirak/counsel-org-capture-string.svg?branch=master]]
 
 This is a counsel wrapper for =org-capture-string= in Emacs Org mode. 
 
