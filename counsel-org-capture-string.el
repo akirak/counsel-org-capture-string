@@ -79,6 +79,15 @@ excluded if this option is turned on."
   :group 'counsel-org-capture-string
   :type 'boolean)
 
+(defcustom counsel-org-capture-string-use-ivy-selector nil
+  "Use an Ivy template selector as the default action.
+
+When this option is non-nil, `counsel-org-capture-string' uses
+an Ivy-based template selector as the default action.
+Otherwise, it uses the built-in template selector of `org-capture'."
+  :group 'counsel-org-capture-string
+  :type 'boolean)
+
 (defvar counsel-org-capture-string--candidates nil)
 (defvar counsel-org-capture-string-history nil)
 
@@ -95,7 +104,10 @@ excluded if this option is turned on."
             #'counsel-org-capture-string--candidates
             :caller 'counsel-org-capture-string
             :history 'counsel-org-capture-string-history
-            :action #'org-capture-string))
+            :action
+            (if counsel-org-capture-string-use-ivy-selector
+                #'counsel-org-capture-string--select
+              #'org-capture-string)))
 
 (defun counsel-org-capture-string--candidates (&optional _string
                                                          _collection
