@@ -67,6 +67,11 @@ When nil, the default value is used."
 (defvar counsel-org-capture-string--candidates nil)
 (defvar counsel-org-capture-string-history nil)
 
+;;;; Faces
+(defface counsel-org-capture-string-template-body-face
+  '((t :inherit font-lock-builtin-face))
+  "Face for template bodies.")
+
 ;;;###autoload
 (defun counsel-org-capture-string ()
   "Supply input to `org-capture-string' from counsel."
@@ -114,9 +119,27 @@ When nil, the default value is used."
                                   table)))
          (w3 (apply #'max (mapcar (lambda (cells) (length (nth 2 cells)))
                                   table)))
-         (fmt (format "%%-%ds  %%-%ds  %%-%ds  %%s" w1 w2 w3)))
+         (w4 (apply #'max (mapcar (lambda (cells) (length (nth 3 cells)))
+                                  table)))
+         (fmt (format "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " w1 w2 w3 w4)))
     (mapcar (lambda (cell) (apply #'format fmt cell))
             table)))
+
+(defun counsel-org-capture-string--template-list-transformer (str)
+  (let* ((name (car (split-string str)))
+         (template (assoc name org-capture-templates))
+         (body (nth 4 template)))
+    (concat str
+            (propertize (pcase body
+                          ((pred stringp)
+                           (string-join (split-string body "\n") "\\n"))
+                          (`(file ,filename)
+                           (format "(file %s)" filename))
+                          (`(function ,function)
+                           (if (symbolp function)
+                               (format "(function %s)" function)
+                             "(function lambda)")))
+                        'face 'counsel-org-capture-string-template-body-face))))
 
 (defun counsel-org-capture-string--select (string)
   "Capture something with STRING as an initial input."
@@ -131,6 +154,9 @@ When nil, the default value is used."
 (ivy-add-actions 'counsel-org-capture-string
                  '(("c" counsel-org-capture-string--select
                     "Select a template via Ivy")))
+
+(ivy-set-display-transformer 'counsel-org-capture-string--select
+                             #'counsel-org-capture-string--template-list-transformer)
 
 ;;;; Example candidate functions
 
