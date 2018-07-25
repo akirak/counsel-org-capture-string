@@ -94,7 +94,8 @@ Otherwise, it uses the built-in template selector of `org-capture'."
 ;;;; Faces
 (defface counsel-org-capture-string-template-body-face
   '((t :inherit font-lock-builtin-face))
-  "Face for template bodies.")
+  "Face for template bodies."
+  :group 'counsel-org-capture-string)
 
 ;;;###autoload
 (defun counsel-org-capture-string ()
