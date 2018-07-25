@@ -64,6 +64,21 @@ When nil, the default value is used."
          (set key value)
          (map-put ivy-height-alist 'counsel-org-capture-string value)))
 
+(defcustom counsel-org-capture-string-filter-templates t
+  "Exclude templates only that contain \"%i\" in the body.
+
+This affects the descriptive list of templates (which is bound on
+\"c\" by default).  As `org-capture-string' sets the initial text
+of `org-capture' to its argument, it doesn't make sense if the
+template doesn't contain a place holder for the initial text.
+
+When this option is turned on, the template list function checks
+the template strings and eliminate that don't contain a place holder.
+Note that non-string templates, i.e. a file or a function, are also
+excluded if this option is turned on."
+  :group 'counsel-org-capture-string
+  :type 'boolean)
+
 (defvar counsel-org-capture-string--candidates nil)
 (defvar counsel-org-capture-string-history nil)
 
@@ -103,8 +118,11 @@ When nil, the default value is used."
 
 (defun counsel-org-capture-string--template-list (_string _candidates _)
   "Generate a descriptive list of `org-capture-templates'."
-  (let* ((table (cl-loop for (key desc type target) in org-capture-templates
+  (let* ((table (cl-loop for (key desc type target body) in org-capture-templates
                          when type
+                         when (or (not counsel-org-capture-string-filter-templates)
+                                  (and (stringp body)
+                                       (string-match-p "%i" body)))
                          collect (list key
                                        desc
                                        (symbol-name type)
