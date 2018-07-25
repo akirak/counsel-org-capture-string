@@ -144,7 +144,7 @@ Otherwise, it uses the built-in template selector of `org-capture'."
                                          (`(clock) "(clock)")
                                          (`(function ,func) (if (symbolp func)
                                                                 (symbol-name func)
-                                                              ("(lambda)")))
+                                                              "(lambda)"))
                                          (`(,_ ,filename . ,_) (file-name-nondirectory filename))
                                          (_ (prin1-to-string target))))))
          (w1 (apply #'max (mapcar (lambda (cells) (length (nth 0 cells)))
