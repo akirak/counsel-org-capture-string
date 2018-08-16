@@ -145,7 +145,9 @@ Otherwise, it uses the built-in template selector of `org-capture'."
                                          (`(function ,func) (if (symbolp func)
                                                                 (symbol-name func)
                                                               "(lambda)"))
-                                         (`(,_ ,filename . ,_) (file-name-nondirectory filename))
+                                         (`(,_ ,filename . ,_) (if (= 0 (length filename))
+                                                                   "default"
+                                                                 (file-name-nondirectory filename)))
                                          (_ (prin1-to-string target))))))
          (w1 (apply #'max (mapcar (lambda (cells) (length (nth 0 cells)))
                                   table)))
