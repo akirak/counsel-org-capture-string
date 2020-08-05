@@ -40,6 +40,7 @@
 (require 'map)
 (require 'imenu)
 (require 'cl-lib)
+(require 'subr-x)
 
 (defcustom counsel-org-capture-string-sources
   '(counsel-org-capture-string--org-clock-candidates
