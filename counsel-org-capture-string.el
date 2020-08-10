@@ -4,7 +4,7 @@
 
 ;; Author: Akira Komamura <akira.komamura@gmail.com>
 ;; Version: 1.0-pre
-;; Package-Requires: ((emacs "25.1") (ivy "0.10"))
+;; Package-Requires: ((emacs "25.1") (ivy "0.13"))
 ;; Keywords: outlines
 ;; URL: https://github.com/akirak/counsel-org-capture-string
 
@@ -63,7 +63,7 @@ When nil, the default value is used."
   :group 'counsel-org-capture-string
   :set (lambda (key value)
          (set key value)
-         (map-put ivy-height-alist 'counsel-org-capture-string value)))
+         (setf (map-elt ivy-height-alist 'counsel-org-capture-string) value)))
 
 (defcustom counsel-org-capture-string-filter-templates t
   "Exclude templates only that contain \"%i\" in the body.
@@ -126,9 +126,8 @@ Otherwise, it uses the built-in template selector of `org-capture'."
       (format "%s %s" (propertize help 'face 'ivy-action) str)
     str))
 
-(ivy-set-display-transformer
- 'counsel-org-capture-string
- 'counsel-org-capture-string--transformer)
+(ivy-configure 'counsel-org-capture-string
+  :display-transformer-fn 'counsel-org-capture-string--transformer)
 
 (defun counsel-org-capture-string--template-list (_string _candidates _)
   "Generate a descriptive list of `org-capture-templates'."
@@ -163,6 +162,7 @@ Otherwise, it uses the built-in template selector of `org-capture'."
             table)))
 
 (defun counsel-org-capture-string--template-list-transformer (str)
+  "Add a suffix to denote the type of the CANDIDATE in STR."
   (let* ((name (car (split-string str)))
          (template (assoc name org-capture-templates))
          (body (nth 4 template)))
@@ -192,8 +192,8 @@ Otherwise, it uses the built-in template selector of `org-capture'."
                  '(("c" counsel-org-capture-string--select
                     "Select a template via Ivy")))
 
-(ivy-set-display-transformer 'counsel-org-capture-string--select
-                             #'counsel-org-capture-string--template-list-transformer)
+(ivy-configure 'counsel-org-capture-string--select
+  :display-transformer-fn #'counsel-org-capture-string--template-list-transformer)
 
 ;;;; Example candidate functions
 
